@@ -44,16 +44,18 @@ def correct_dataset(input_file, no_of_vertices, output_file):
     adjlist = generate_adjlist(input_file, no_of_vertices)
     generate_proper_data(adjlist, output_file)
 
-def nodeiterator(adjlist):
+def nodeiterator(adjlist,number):
     T = 0
-    for key in adjlist.keys():
+    #for key in adjlist.keys():
+    for key in [number]:
         l = adjlist[key]
         for i in l:
             for j in l:
-                if i!=j and j in adjlist[i]:
-                    T = T+0.5
-    return T/3
-
+                if i != j and j in adjlist[i]:
+                    print i,j
+                    T = T + 0.5
+    #return T/3
+    return T
 
 def nodeiteratorplus(adjlist):
     T = 0
