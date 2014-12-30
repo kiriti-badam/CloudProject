@@ -15,6 +15,8 @@ def generate_adjlist(input_file, no_of_vertices):
             a,b = line.strip().split(" ")
             a = int(a)
             b = int(b)
+            if a == b:
+                continue
             adjlist[a].add(b)
             adjlist[b].add(a)
 

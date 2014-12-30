@@ -6,10 +6,14 @@ import java.io.IOException;
 import java.lang.InterruptedException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Random;
+import java.util.List;
 
 import javax.sound.midi.SysexMessage;
 
@@ -29,6 +33,7 @@ import org.apache.hadoop.util.GenericOptionsParser;
 public class ColorCounting {
 
 	public static HashMap<Integer, Integer> colorMap = null; 
+
 
 	//Mapper input is <Object, Text> and output is <IntWritable,Text>.
 	public static class Mapper1 extends
@@ -84,20 +89,17 @@ public class ColorCounting {
 	public static void main(String[] args) throws IOException,
 			InterruptedException, ClassNotFoundException {
 
+		String root_path = "/home/kiriti/acads/Cloud Computing/CloudProject/";
 	    Random rand = new Random();	//For generating random colors 
 	    //HashMap<Integer, Integer> colorMap = new HashMap<Integer, Integer>();
 	    colorMap = new HashMap<Integer, Integer>();
-		BufferedReader br = new BufferedReader(new FileReader(
-				"/home/kiriti/acads/Cloud Computing/Project/src/new5k.txt"));
 		
 		//Generating a random coloring of vertices
-		int N = 10;	//Number of colors for coloring the graph.
-		for(int i=0; i<5000; i++)	//TODO: Change this manual encoding of 5000
-			colorMap.put(i, randInt(0, N, rand));
+		int N = 1;	//Number of colors for coloring the graph.
+		for(int i=0; i<=5000; i++)	//TODO: Change this manual encoding of 5000
+			colorMap.put(i, randInt(0, N-1, rand));
 		
 	 	Configuration conf = new Configuration();
-		String[] otherArgs = new GenericOptionsParser(conf, args)
-				.getRemainingArgs();
 
 		Job job = new Job(conf, "Sampling by random coloring");
 		job.setJarByClass(ColorCounting.class);
@@ -109,15 +111,82 @@ public class ColorCounting {
 		job.setOutputKeyClass(IntWritable.class);
 		job.setOutputValueClass(Text.class);
 		FileInputFormat.addInputPath(job, new Path(
-				"/home/kiriti/acads/Cloud Computing/Project/src/new5k.txt"));
+				root_path+"proper_dataset.txt"));
 		FileOutputFormat.setOutputPath(job, new Path(
-				"/home/kiriti/acads/Cloud Computing/Project/src/output"));
+				root_path+"output"));
 		if (job.waitForCompletion(true)) {
 			System.out.println("Hurray!!");
 		} else {
 			System.out.println("Error in job ");
 			System.exit(0);
 		}
+		
+		//Write the nodeIterator part to count the total number of Triangles.
 
+		LinkedHashMap<Integer, Set<Integer>> adjmap = new LinkedHashMap<Integer, Set<Integer>>();
+		BufferedReader br = new BufferedReader(new FileReader(root_path+"output/part-r-00000"));
+
+		//Construct the adjacency list from the output of the mapreduce
+		try {
+			System.out.println("entered!");
+			String line = br.readLine();
+
+			while (line != null) {
+
+				String[] vertices = line.split("\\s+");
+				Integer color = Integer.parseInt(vertices[0]);
+				Integer v1 = Integer.parseInt(vertices[1]);
+				Integer v2 = Integer.parseInt(vertices[2]);
+
+				if(adjmap.containsKey(v1))
+				{
+					Set<Integer> s = adjmap.get(v1);
+					s.add(v2);
+					adjmap.put(v1, s);
+				}
+				else
+				{
+					Set<Integer> s = new HashSet<Integer>();
+					s.add(v2);
+					adjmap.put(v1,s);
+				}
+
+				if(adjmap.containsKey(v2))
+				{
+					Set<Integer> s = adjmap.get(v2);
+					s.add(v1);
+					adjmap.put(v2, s);
+				}
+				else
+				{
+					Set<Integer> s = new HashSet<Integer>();
+					s.add(v1);
+					adjmap.put(v2,s);
+				}
+				line = br.readLine();
+			}
+			System.out.println(adjmap.get(1810).toString());
+			
+			//Node iterator basic part for counting the triangles.
+			double T = 0;
+			Iterator<Integer> it = adjmap.keySet().iterator();
+			while(it.hasNext())
+			{
+				Integer v = it.next();
+				for(Integer u : adjmap.get(v))
+				{
+					for(Integer w : adjmap.get(v))
+					{
+						if(u!=w && adjmap.get(u).contains(w))
+							T += 0.5;
+					}
+				}
+			}
+			System.out.format("Total number of triangles are %f",T/3);
+			System.out.format("The value of total triangles is %f", (T/3)*N*N);
+
+		} catch (Exception e) {
+			System.out.println(e.toString());
+		}
 	}
 }
