@@ -12,7 +12,7 @@ def generate_adjlist(input_file, no_of_vertices):
     # Useful because the whole file won't be loaded into the memory, works as an iterable.
     with open(input_file, "r") as f:
         for line in f:
-            a,b = line.strip().split(" ")
+            a,b = line.strip().split()
             a = int(a)
             b = int(b)
             if a == b:
@@ -68,4 +68,22 @@ def nodeiteratorplus(adjlist):
                         if u!=w and u in adjlist[w]:
                             T = T+1
     return T
+
+def add1(input_file, output_file):
+    f = open(input_file,'r')
+    nf = open(output_file,'w')
+    
+    for line in f:
+    
+        line = line.replace('\n','')
+        nf.write('-1\t'+line+'\n')
+    
+    f.close()
+    nf.close()
+
+def degree(input_file, no_of_vertices, output_file):
+    f = open(output_file,'w')
+    a = generate_adjlist(input_file,no_of_vertices)
+    for i in range(0,no_of_vertices+1):
+        f.write(str(i)+" "+str(len(a[i]))+"\n")
 

@@ -1,0 +1,4 @@
+rm -rf clustering_coeff1/
+rm -rf finaloutput1/
+rm -rf output1/
+rm -rf output/
