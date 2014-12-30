@@ -95,7 +95,7 @@ public class ColorCounting {
 	    colorMap = new HashMap<Integer, Integer>();
 		
 		//Generating a random coloring of vertices
-		int N = 1;	//Number of colors for coloring the graph.
+		int N = 7;	//Number of colors for coloring the graph.
 		for(int i=0; i<=5000; i++)	//TODO: Change this manual encoding of 5000
 			colorMap.put(i, randInt(0, N-1, rand));
 		
@@ -165,7 +165,8 @@ public class ColorCounting {
 				}
 				line = br.readLine();
 			}
-			System.out.println(adjmap.get(1810).toString());
+			System.out.println(adjmap.get(0).toString());
+			System.out.println(adjmap.get(0).toString());
 			
 			//Node iterator basic part for counting the triangles.
 			double T = 0;
